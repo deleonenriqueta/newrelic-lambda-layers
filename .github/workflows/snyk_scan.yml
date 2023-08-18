@@ -14,16 +14,13 @@ jobs:
   security:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Navigate to Java Directory
-        run: cd java
-
-      - name: Run Snyk To Check For Vulnerabilities
-        uses: snyk/actions/gradle@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          command: test
-          args: --org=java-agent-test --configuration-matching='(^compileClasspath$)|(^runtimeClasspath$)'
+    - name: Navigate to Java Directory
+      run: cd java
+    - uses: actions/checkout@master
+    - name: Run Snyk To Check For Vulnerabilities
+      uses: snyk/actions/gradle@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        command: test
+        args: --all-sub-projects --org=java-agent-test --configuration-matching='(^compileClasspath$)|(^runtimeClasspath$)'
