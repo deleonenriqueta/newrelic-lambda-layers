@@ -10,10 +10,13 @@ on:
       - main
 
 jobs:
-  navigate:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - run: cd java
+    - name: Checkout Code
+      uses: actions/checkout@v3
+    - name: Navigate to /java Directory
+      run: cd java/
   security:
     runs-on: ubuntu-latest
     steps:
