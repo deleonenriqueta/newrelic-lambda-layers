@@ -17,9 +17,6 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@master
-
-      - name: Navigate to Java Directory
-        run: cd java
         
       - name: Run Snyk To Check For Vulnerabilities
         uses: snyk/actions/gradle@master
@@ -27,4 +24,4 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           command: test
-          args: --all-sub-projects --org=java-agent-test --configuration-matching='(^compileClasspath$)|(^runtimeClasspath$)'
+          args: --file=java/build.gradle --org=java-agent-test --configuration-matching='(^compileClasspath$)|(^runtimeClasspath$)'
