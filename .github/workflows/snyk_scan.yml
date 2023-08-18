@@ -1,11 +1,12 @@
-# This workflow automates the process of identifying potential security vulnerabilities using Snyk. 
-# Dependency vulnerability scans will be run on a weekly schedule, but can also be triggered manually.
-name: Snyk Vulnerability Scan
+# This workflow automates the process of identifying potential security vulnerabilities 
+# using Snyk. Dependency vulnerability scans will be run when a push is made to the main 
+# branch, on a weekly schedule, and can also be triggered manually.
 
+name: Snyk Vulnerability Scan
 on:
   workflow_dispatch:
   schedule:
-    - cron: '00 15 * * 1'
+  - cron: '00 15 * * 1'
   push:
     branches:
       - main
@@ -14,13 +15,16 @@ jobs:
   security:
     runs-on: ubuntu-latest
     steps:
-    - name: Navigate to Java Directory
-      run: cd java
-    - uses: actions/checkout@master
-    - name: Run Snyk To Check For Vulnerabilities
-      uses: snyk/actions/gradle@master
-      env:
-        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      with:
-        command: test
-        args: --all-sub-projects --org=java-agent-test --configuration-matching='(^compileClasspath$)|(^runtimeClasspath$)'
+      - name: Checkout Code
+        uses: actions/checkout@master
+
+      - name: Navigate to Java Directory
+        run: cd java
+        
+      - name: Run Snyk To Check For Vulnerabilities
+        uses: snyk/actions/gradle@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: test
+          args: --all-sub-projects --org=java-agent-test --configuration-matching='(^compileClasspath$)|(^runtimeClasspath$)'
