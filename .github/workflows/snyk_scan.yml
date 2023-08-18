@@ -13,7 +13,7 @@ jobs:
   navigate:
     runs-on: ubuntu-latest
     steps:
-      - run: pwd
+      - run: cd Java
   security:
     runs-on: ubuntu-latest
     steps:
