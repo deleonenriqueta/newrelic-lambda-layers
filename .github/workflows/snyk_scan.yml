@@ -26,4 +26,4 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           command: test
-          args: --all-sub-projects --org=java-agent-test --configuration-matching='(^compileClasspath$)|(^runtimeClasspath$)'
+          args: --org=java-agent-test --configuration-matching='(^compileClasspath$)|(^runtimeClasspath$)'
