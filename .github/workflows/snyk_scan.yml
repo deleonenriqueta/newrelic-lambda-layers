@@ -20,11 +20,8 @@ jobs:
         with:
           ref: 'master'
 
-      - name: Change Dir
-        run: |
-          pwd
-          ls
-          cd java/  
+      - name: Navigate to Java Directory
+        run: cd java/  
     
       - name: Run Snyk To Check For Vulnerabilities
         uses: snyk/actions/gradle@master
