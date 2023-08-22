@@ -23,6 +23,7 @@ jobs:
       - name: Change Dir
         run: |
           pwd
+          ls
           cd /java  
     
       - name: Run Snyk To Check For Vulnerabilities
