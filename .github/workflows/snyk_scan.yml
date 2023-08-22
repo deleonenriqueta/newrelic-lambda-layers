@@ -9,19 +9,24 @@ on:
   - cron: '00 15 * * 1'
   push:
     branches:
-      - main
+      - master
 
 jobs:
   security:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@master
-        
+        uses: actions/checkout@v3
+        with:
+          ref: 'master'
+
+      - name: Change Dir
+        run: cd /java  
+    
       - name: Run Snyk To Check For Vulnerabilities
         uses: snyk/actions/gradle@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           command: test
-          args: --file=java/build.gradle --org=java-agent-test --configuration-matching='(^compileClasspath$)|(^runtimeClasspath$)'
+          args: --org=java-agent-test --configuration-matching='(^compileClasspath$)|(^runtimeClasspath$)'
