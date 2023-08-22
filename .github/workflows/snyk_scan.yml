@@ -24,7 +24,7 @@ jobs:
         run: |
           pwd
           ls
-          cd /java  
+          cd java/  
     
       - name: Run Snyk To Check For Vulnerabilities
         uses: snyk/actions/gradle@master
