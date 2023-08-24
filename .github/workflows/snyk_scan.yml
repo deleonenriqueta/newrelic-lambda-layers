@@ -20,22 +20,11 @@ jobs:
         with:
           ref: 'master'
 
-      - name: List Environment Variables
-        run: env
-
-      - name: Debug - List Files in Java Directory
-        run: ls -al java
-
       - name: Navigate to Java Directory
         run: cd $GITHUB_WORKSPACE/java
-
-      - name: Debug - Start Interactive Debug Session
-        run: /bin/bash
-        env:
-          GITHUB_WORKSPACE: $GITHUB_WORKSPACE
     
       - name: Run Snyk To Check For Vulnerabilities
-        uses: snyk/actions/gradle@master
+        uses: snyk/actions/gradle-jdk17@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
