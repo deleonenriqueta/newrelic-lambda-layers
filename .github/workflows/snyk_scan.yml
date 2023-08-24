@@ -25,6 +25,9 @@ jobs:
           cd java/
           pwd
           ls
+
+      - name: Install Dependencies
+        run: ./gradlew assemble
     
       - name: Run Snyk To Check For Vulnerabilities
         uses: snyk/actions/gradle@master
