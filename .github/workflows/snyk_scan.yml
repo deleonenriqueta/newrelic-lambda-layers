@@ -24,7 +24,7 @@ jobs:
         run: ls -al
 
       - name: Navigate to Java Directory
-        run: cd java
+        run: cd $GITHUB_WORKSPACE/java
 
       - name: List Files in Current Directory
         run: ls -al
