@@ -20,14 +20,18 @@ jobs:
         with:
           ref: 'master'
 
-      - name: List Files in Current Directory
-        run: ls -al
+      - name: Debug - List Files in Current Directory
+        run: |
+          ls -al
+          pwd
 
       - name: Navigate to Java Directory
         run: cd $GITHUB_WORKSPACE/java
 
-      - name: List Files in Current Directory
-        run: ls -al
+      - name: Debug - List Files in Current Directory
+        run: |
+          ls -al
+          pwd
     
       - name: Run Snyk To Check For Vulnerabilities
         uses: snyk/actions/gradle@master
