@@ -32,5 +32,5 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           command: test
-          args: --org=java-agent-test
+          args: --file=/home/runner/work/newrelic-lambda-layers/newrelic-lambda-layers/java/build.gradle
           # args: --org=java-agent-test --configuration-matching='(^compileClasspath$)|(^runtimeClasspath$)'
