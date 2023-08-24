@@ -27,7 +27,7 @@ jobs:
           ls
 
       - name: Install Dependencies
-        run: ./gradlew assemble
+        run: chmod +x gradlew && ./gradlew assemble
     
       - name: Run Snyk To Check For Vulnerabilities
         uses: snyk/actions/gradle@master
@@ -35,5 +35,6 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           command: test
-          args: --file=/home/runner/work/newrelic-lambda-layers/newrelic-lambda-layers/java/build.gradle
+          args: --configuration-matching='(^compileClasspath$)|(^runtimeClasspath$)'
+
           # args: --org=java-agent-test --configuration-matching='(^compileClasspath$)|(^runtimeClasspath$)'
