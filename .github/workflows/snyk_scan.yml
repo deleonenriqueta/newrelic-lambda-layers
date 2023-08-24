@@ -32,7 +32,7 @@ jobs:
       - name: Debug - Start Interactive Debug Session
         run: /bin/bash
         env:
-          GITHUB_WORKSPACE: $GTIHUB_WORKSPACE
+          GITHUB_WORKSPACE: $GITHUB_WORKSPACE
     
       - name: Run Snyk To Check For Vulnerabilities
         uses: snyk/actions/gradle@master
