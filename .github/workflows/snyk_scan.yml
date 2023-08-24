@@ -22,7 +22,6 @@ jobs:
 
       - name: Navigate to Java Directory
         run: |
-          echo ${{ github.workspace }}
           cd java
           pwd
           ls
@@ -33,6 +32,6 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           command: test
-          args: --file=/home/runner/work/newrelic-lambda-layers/newrelic-lambda-layers/java/build.gradle
+          args: --file=build.gradle
 
           # args: --org=java-agent-test --configuration-matching='(^compileClasspath$)|(^runtimeClasspath$)'
