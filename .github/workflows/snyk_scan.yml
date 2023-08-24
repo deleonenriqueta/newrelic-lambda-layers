@@ -20,6 +20,9 @@ jobs:
         with:
           ref: 'master'
 
+      - name: List Environment Variables
+        run: env
+
       - name: Debug - List Files in Current Directory
         run: |
           ls -al
