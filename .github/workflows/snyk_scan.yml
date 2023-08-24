@@ -24,7 +24,7 @@ jobs:
         run: cd $GITHUB_WORKSPACE/java
     
       - name: Run Snyk To Check For Vulnerabilities
-        uses: snyk/actions/gradle-jdk17@master
+        uses: snyk/actions/gradle-jdk11@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
