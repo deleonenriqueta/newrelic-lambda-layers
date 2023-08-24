@@ -20,11 +20,14 @@ jobs:
         with:
           ref: 'master'
 
+      - name: List Files in Current Directory
+        run: ls -al
+
       - name: Navigate to Java Directory
-        run: |
-          cd java
-          pwd
-          ls
+        run: cd java
+
+      - name: List Files in Current Directory
+        run: ls -al
     
       - name: Run Snyk To Check For Vulnerabilities
         uses: snyk/actions/gradle@master
@@ -32,6 +35,4 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           command: test
-          args: --file=build.gradle
-
-          # args: --org=java-agent-test --configuration-matching='(^compileClasspath$)|(^runtimeClasspath$)'
+          args: --org=java-agent-test --configuration-matching='(^compileClasspath$)|(^runtimeClasspath$)'
