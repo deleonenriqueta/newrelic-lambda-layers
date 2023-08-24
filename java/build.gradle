@@ -46,9 +46,4 @@ java {
     targetCompatibility = javaVersion
 }
 
-tasks.withType(JavaCompile) {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
-}
-
 packageLayer.dependsOn build
