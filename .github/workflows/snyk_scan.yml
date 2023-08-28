@@ -13,6 +13,7 @@ on:
 
 jobs:
   security:
+    name: Run Snyk To Check For Vulnerabilities
     runs-on: ubuntu-latest
 
     steps:
@@ -27,12 +28,12 @@ jobs:
       # - name: List Current Dir Files
       #   run: ls -a
         
-      - name: Run Snyk To Check For Vulnerabilities
-        uses: snyk/actions/gradle-jdk11@master
+      - name: Run Snyk Scan
+        uses: snyk/actions/gradle@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           command: monitor
-          entryPoint: $GITHUB_WORKSPACE/java
+          working-drirectory: java
           # args: --org=java-agent-test --file=$GITHUB_WORKSPACE/java/build.gradle --configuration-matching='(^compileClasspath$)|(^runtimeClasspath$)'
           args: --org=java-agent-test --all-sub-projects --configuration-matching='(^compileClasspath$)|(^runtimeClasspath$)'
