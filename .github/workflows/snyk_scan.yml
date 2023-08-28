@@ -32,6 +32,6 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
-          command: monitor
+          command: test
           # args: --org=java-agent-test --file=$GITHUB_WORKSPACE/java/build.gradle --configuration-matching='(^compileClasspath$)|(^runtimeClasspath$)'
           args: --org=java-agent-test --configuration-matching='(^compileClasspath$)|(^runtimeClasspath$)'
