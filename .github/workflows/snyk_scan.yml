@@ -19,6 +19,9 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: 'master'
+
+      - name: Navigate to Java Directory
+        run: cd java/
     
       - name: Run Snyk To Check For Vulnerabilities
         uses: snyk/actions/gradle-jdk11@master
