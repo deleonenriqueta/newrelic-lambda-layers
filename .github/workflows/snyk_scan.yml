@@ -22,7 +22,7 @@ jobs:
           ref: 'master'
           
       - name: Navigate to Java Directory
-        run: cd java/
+        run: cd $GITHUB_WORKSPACE/java/
 
       - name: List Current Dir Files
         run: ls -a
