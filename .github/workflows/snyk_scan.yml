@@ -24,8 +24,8 @@ jobs:
       - name: Navigate to Java Directory
         run: cd $GITHUB_WORKSPACE/java
 
-      # - name: List Current Dir Files
-      #   run: ls -a
+      - name: List Current Dir Files
+        run: ls -a
         
       - name: Run Snyk Scan
         uses: snyk/actions/gradle@master
