@@ -21,11 +21,11 @@ jobs:
         with:
           ref: 'master'
           
-      - name: Navigate to Java Directory
-        run: cd $GITHUB_WORKSPACE/java/
+      # - name: Navigate to Java Directory
+      #   run: cd $GITHUB_WORKSPACE/java/
 
-      - name: List Current Dir Files
-        run: ls -a
+      # - name: List Current Dir Files
+      #   run: ls -a
         
       - name: Run Snyk To Check For Vulnerabilities
         uses: snyk/actions/gradle-jdk11@master
@@ -33,5 +33,5 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           command: monitor
-          # args: --org=java-agent-test --file=$GITHUB_WORKSPACE/java/build.gradle --configuration-matching='(^compileClasspath$)|(^runtimeClasspath$)'
-          args: --org=java-agent-test --all-sub-projects --configuration-matching='(^compileClasspath$)|(^runtimeClasspath$)'
+          args: --org=java-agent-test --file=$GITHUB_WORKSPACE/java/build.gradle --configuration-matching='(^compileClasspath$)|(^runtimeClasspath$)'
+          # args: --org=java-agent-test --all-sub-projects --configuration-matching='(^compileClasspath$)|(^runtimeClasspath$)'
