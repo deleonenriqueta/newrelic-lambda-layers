@@ -22,11 +22,11 @@ jobs:
           ref: 'master'
           
       - name: Navigate to Java Directory
-        run: |
-          ls
-          cd java/
-          ls
+        run: cd java/
 
+      - name: List Current Dir Files
+        run: ls -a
+        
       - name: Run Snyk To Check For Vulnerabilities
         uses: snyk/actions/gradle-jdk11@master
         env:
