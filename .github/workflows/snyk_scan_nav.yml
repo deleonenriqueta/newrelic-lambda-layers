@@ -8,15 +8,14 @@ on:
 jobs:
   security:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./java
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
         with:
           ref: 'master'
-
-      - name: List Current Dir, Nav and List
-        working-directory: ./java
-        run: ls
 
       # - name: Navigate to Java Directory
       #   run: cd java
