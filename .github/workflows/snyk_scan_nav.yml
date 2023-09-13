@@ -1,32 +1,22 @@
-name: Snyk Vulnerability Scan - Navigating to Project
+name: Snyk Vulnerability Scanning (With Nav)
+
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - master
-
+  
 jobs:
   security:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./java
+    container: "docker://snyk/snyk:gradle-jdk8"
+
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
-        with:
-          ref: 'master'
-
-      # - name: Navigate to Java Directory
-      #   run: cd java
-
-      # - name: List Current Dir After Navigation
-      #   run: ls -a
+        uses: actions/checkout@main
+      
+      - name: Setup Authentication
+        run: |
+          snyk auth ${{ secrets.SNYK_TOKEN }}
     
-      - name: Run Snyk To Check For Vulnerabilities
-        uses: snyk/actions/gradle-jdk11@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          command: test
-          args: --configuration-matching='(^compileClasspath$)|(^runtimeClasspath$)'
+      - name: Run Snyk Dependency Scan
+        run: |
+          cd java
+          snyk test
