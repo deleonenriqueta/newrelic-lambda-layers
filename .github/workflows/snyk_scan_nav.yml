@@ -6,7 +6,7 @@ on:
 jobs:
   security:
     runs-on: ubuntu-latest
-    container: "docker://snyk/snyk:gradle"
+    container: "docker://snyk/snyk:gradle-jdk8"
 
     steps:
       - name: Checkout Code
