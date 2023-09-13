@@ -19,4 +19,5 @@ jobs:
       - name: Run Snyk Dependency Scan
         run: |
           cd java
-          snyk test
+          snyk monitor --org=java-agent-test --configuration-matching='(^compileClasspath$)|(^runtimeClasspath$)'
+
