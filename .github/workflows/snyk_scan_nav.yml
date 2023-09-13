@@ -10,7 +10,9 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@main
+        uses: actions/checkout@v3
+        with:
+          ref: 'master'
       
       - name: Setup Authentication
         run: |
