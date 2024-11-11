@@ -4,7 +4,7 @@
 
 This repository contains source code and utilities to build and publish New Relic's public AWS Lambda layers.
 
-Most users should use our published layers which are chosen automatically via the [CLI tool](https://github.com/newrelic/newrelic-lambda-cli). Those layers are published to be public and are available [here](https://nr-layers.iopipe.com).
+Most users should use our published layers which are chosen automatically via the [CLI tool](https://github.com/newrelic/newrelic-lambda-cli). Those layers are published to be public and are available [here](https://layers.newrelic-external.com/).
 
 This tool is released for users seeking to deploy their own copies of the New Relic Lambda Layers into their accounts, or to modify and publish their own customized wrapper layers.
 
@@ -16,29 +16,40 @@ This tool is released for users seeking to deploy their own copies of the New Re
 The AWS cli must be configured, please refer to its [documentation](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html).
 
 ## Publishing Layers:
-
-Run the following in your shell:
+To publish the layer, modify the runtime according to the options provided in the `.publish-layers.sh` script. Then, run the following command in your shell:
 
 ```
 cd python
+./publish-layers.sh python3.12 
+cd ..
+```
+
+```
+cd nodejs
+./publish-layers.sh nodejs20x 
+cd ..
+```
+
+```
+cd ruby
+./publish-layers.sh ruby3.3 
+cd ..
+```
+
+```
+cd java
+./publish-layers.sh java21
+cd ..
+```
+
+```
+cd dotnet
 ./publish-layers.sh
 cd ..
 ```
 
 ```
-cd nodejs;
-./publish-layers.sh
-cd ..
-```
-
-```
-cd java;
-./publish-layers.sh
-cd ..
-```
-
-```
-cd extension;
+cd extension
 ./publish-layer.sh
 cd ..
 ```
@@ -68,13 +79,19 @@ These steps will help you configure the layers correctly:
 3. Update your functions handler to point to the newly attached layer in the console for your function:
   * Python: `newrelic_lambda_wrapper.handler`
   * Node: `newrelic-lambda-wrapper.handler`
+  * Ruby: `newrelic_lambda_wrapper.handler`
   * Java:
     * RequestHandler implementation: `com.newrelic.java.HandlerWrapper::handleRequest`
     * RequestStreamHandlerWrapper implementation: `com.newrelic.java.HandlerWrapper::handleStreamsRequest`
+  * .NET: This step is not required.
 4. Add these environment variables to your Lambda console:
   * NEW_RELIC_ACCOUNT_ID: Your New Relic account ID
   * NEW_RELIC_LAMBDA_HANDLER: Path to your initial handler.
   * NEW_RELIC_USE_ESM: For Node.js handlers using ES Modules, set to `true`.
+  * CORECLR_ENABLE_PROFILING (.NET only): 1
+  * CORECLR_PROFILER (.NET only): {36032161-FFC0-4B61-B559-F6C5D41BAE5A}
+  * CORECLR_NEWRELIC_HOME (.NET only): /opt/lib/newrelic-dotnet-agent
+  * CORECLR_PROFILER_PATH (.NET only): /opt/lib/newrelic-dotnet-agent/libNewRelicProfiler.so
 
 Refer to the [New Relic AWS Lambda Monitoring Documentation](https://docs.newrelic.com/docs/serverless-function-monitoring/aws-lambda-monitoring/get-started/enable-new-relic-monitoring-aws-lambda) for instructions on completing your configuration by linking your AWS Account and Cloudwatch Log Streams to New Relic.
 
@@ -88,10 +105,34 @@ You may see some warnings from the Extension in CloudWatch logs referring to a n
 
 If your Node functions use `import` and top-level `await` in Node 16 or Node 14 runtimes, layer-installed instrumentation will be unable to find imported modules, as [`import` specifiers don't resolve with `NODE_PATH`](https://nodejs.org/docs/latest-v16.x/api/esm.html#no-node_path). You can still instrument your functions with New Relic, but you will need to do the following:
 
-1. [instrument your function manually](https://docs.newrelic.com/docs/serverless-function-monitoring/aws-lambda-monitoring/enable-lambda-monitoring/enable-serverless-monitoring-aws-lambda-legacy#node) using our [Node Agent](https://github.com/newrelic/node-newrelic/)
+1. [instrument your function manually](#manual-instrumentation-for-es-modules) using our [Node Agent](https://github.com/newrelic/node-newrelic/) 
 2. On deploying your function, don't set the function handler to our Node wrapper; instead, use your regular handler function, which you've wrapped with `newrelic.setLambdaHandler()`.
-3. Install our Extension-only Lambda Layer for delivering telemetry. Use our [layer discovery website](https://layers.newrelic-external.com/) to find the ARN for your region. Look for either NewRelicLambdaExtension or NewRelicLambdaExtensionARM64 (depending on your function's architecture).
+3. If you're using Node 18 or above, apply the latest Lambda Layer for your runtime. It will install both the Node agent and our Lambda Extension.
+4. If you're using Node 14 or Node 16, you will have to deploy our agent with your function code, but you could use our Extension-only Lambda Layer for delivering telemetry. Use our [layer discovery website](https://layers.newrelic-external.com/) to find the ARN for your region. Look for either NewRelicLambdaExtension or NewRelicLambdaExtensionARM64 (depending on your function's architecture).
 4. Add your `NEW_RELIC_LICENSE_KEY` as an environment variable.
+
+## Note on performance for ES Module functions
+
+In order to wrap ESM functions without a code change, our wrapper awaits the completion of a dynamic import. If your ESM function depends on a large number of dependency and file imports, you may see long cold start times as a result. As a workaround, we recommend instrumenting manually, following the instructions below.
+
+## Manual instrumentation for ES Modules
+
+First import the New Relic Node agent into your handler file:
+
+```javascript
+import newrelic from 'newrelic'
+```
+
+Then wrap your handler function using the `.setLambdaHandler` method: 
+```javascript
+export const handler = newrelic.setLambdaHandler(async (event, context) => {
+    // TODO implement
+    return {
+        statusCode: 200,
+        body: JSON.stringify('Hello from Lambda!')
+    }
+})
+```
 
 ## Support
 

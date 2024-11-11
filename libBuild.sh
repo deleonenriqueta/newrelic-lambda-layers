@@ -4,7 +4,7 @@ set -Eeuo pipefail
 
 # Regions that support arm64 architecture
 REGIONS_ARM=(
-  af-south-1
+	af-south-1
 	ap-northeast-1
 	ap-northeast-2
 	ap-northeast-3
@@ -60,7 +60,7 @@ EXTENSION_DIST_DIR=extensions
 EXTENSION_DIST_ZIP=extension.zip
 EXTENSION_DIST_PREVIEW_FILE=preview-extensions-ggqizro707
 
-EXTENSION_VERSION=2.3.9
+EXTENSION_VERSION=2.3.14
 
 function list_all_regions {
     aws ec2 describe-regions \
@@ -95,6 +95,12 @@ function layer_name_str() {
     "java11")
       rt_part="Java11"
       ;;
+    "java17")
+      rt_part="Java17"
+      ;;
+    "java21")
+      rt_part="Java21"
+      ;;
     "python3.7")
       rt_part="Python37"
       ;;
@@ -110,14 +116,23 @@ function layer_name_str() {
     "python3.11")
       rt_part="Python311"
       ;;
-    "nodejs14.x")
-      rt_part="NodeJS14X"
-      ;;
-    "nodejs16.x")
-      rt_part="NodeJS16X"
+    "python3.12")
+      rt_part="Python312"
       ;;
     "nodejs18.x")
       rt_part="NodeJS18X"
+      ;;
+    "nodejs20.x")
+      rt_part="NodeJS20X"
+      ;;
+    "ruby3.2")
+      rt_part="Ruby32"
+      ;;
+    "ruby3.3")
+      rt_part="Ruby33"
+      ;;
+    "dotnet")
+      rt_part="Dotnet"
       ;;
     esac
 
@@ -158,14 +173,20 @@ function s3_prefix() {
     "python3.11")
       name="nr-python3.11"
       ;;
-    "nodejs14.x")
-      name="nr-nodejs14.x"
-      ;;
-    "nodejs16.x")
-      name="nr-nodejs16.x"
+    "python3.12")
+      name="nr-python3.12"
       ;;
     "nodejs18.x")
       name="nr-nodejs18.x"
+      ;;
+    "nodejs20.x")
+      name="nr-nodejs20.x"
+      ;;
+    "ruby3.3")
+      name="nr-ruby3.3"
+      ;;
+    "dotnet")
+      name="nr-dotnet"
       ;;
     esac
 
@@ -195,7 +216,11 @@ function publish_layer {
 
     compat_list=( $runtime_name )
     if [[ $runtime_name == "provided" ]]
-    then compat_list=("provided" "provided.al2" "dotnetcore3.1" "dotnet6")
+    then compat_list=("provided" "provided.al2" "provided.al2023" "dotnetcore3.1")
+    fi
+
+    if [[ $runtime_name == "dotnet" ]]
+    then compat_list=("dotnet6" "dotnet8")
     fi
 
     echo "Uploading ${layer_archive} to s3://${bucket_name}/${s3_key}"
@@ -227,4 +252,110 @@ function publish_layer {
       --principal "*" \
       --region "$region"
     echo "Public permissions set for ${runtime_name} layer version ${layer_version} in region ${region}"
+
+}
+
+
+function publish_docker_ecr {
+    layer_archive=$1
+    runtime_name=$2
+    arch=$3
+
+    if [[ ${arch} =~ 'arm64' ]];
+    then 
+        arch_flag="-arm64"
+        platform="linux/arm64"
+    else 
+        arch_flag=""
+        platform="linux/amd64"
+    fi
+
+    version_flag=$(echo "$runtime_name" | sed 's/[^0-9]//g')
+    language_flag=$(echo "$runtime_name" | sed 's/[0-9].*//')
+
+    if [[ ${runtime_name} =~ 'extension' ]]; then
+    version_flag=$EXTENSION_VERSION
+    language_flag="lambdaextension"
+    fi
+    
+    if [[ ${runtime_name} =~ 'dotnet' ]]; then
+    version_flag=""
+    arch_flag=${arch}
+    fi
+
+    # Remove 'dist/' prefix
+    if [[ $layer_archive == dist/* ]]; then
+      file_without_dist="${layer_archive#dist/}"
+      echo "File without 'dist/': $file_without_dist"
+    else
+      file_without_dist=$layer_archive
+      echo "File does not start with 'dist/': $file_without_dist"
+    fi
+
+    # public ecr repository name 
+    # maintainer can use this("q6k3q1g1") repo name for testing 
+    repository="x6n7b2o2"
+
+    # copy dockerfile
+    cp ../Dockerfile.ecrImage .
+
+    echo "Running : aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/${repository}"
+    aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/${repository}
+
+    echo "docker buildx build --platform ${platform} -t layer-nr-image-${language_flag}-${version_flag}${arch_flag}:latest \
+    -f Dockerfile.ecrImage \
+    --build-arg layer_zip=${layer_archive} \
+    --build-arg file_without_dist=${file_without_dist} \
+    ."
+
+    docker buildx build --platform ${platform} -t layer-nr-image-${language_flag}-${version_flag}${arch_flag}:latest \
+    -f Dockerfile.ecrImage \
+    --build-arg layer_zip=${layer_archive} \
+    --build-arg file_without_dist=${file_without_dist} \
+    .
+
+    echo "docker tag layer-nr-image-${language_flag}-${version_flag}${arch_flag}:latest public.ecr.aws/${repository}/newrelic-lambda-layers-${language_flag}:${version_flag}${arch_flag}"
+    docker tag layer-nr-image-${language_flag}-${version_flag}${arch_flag}:latest public.ecr.aws/${repository}/newrelic-lambda-layers-${language_flag}:${version_flag}${arch_flag}
+    echo "docker push public.ecr.aws/${repository}/newrelic-lambda-layers-${language_flag}:${version_flag}${arch_flag}"
+    docker push public.ecr.aws/${repository}/newrelic-lambda-layers-${language_flag}:${version_flag}${arch_flag}
+
+    # delete dockerfile
+    rm -rf Dockerfile.ecrImage
+}
+
+function publish_docker_hub {
+  layer_archive=$1
+  runtime_name=$2
+  arch=$3
+  if [[ ${arch} =~ 'arm64' ]];
+  then arch_flag="-arm64"
+  else arch_flag=""
+  fi
+  version_flag=$(echo "$runtime_name" | sed 's/[^0-9]//g')
+  language_flag=$(echo "$runtime_name" | sed 's/[0-9].*//')
+  # Remove 'dist/' prefix
+  if [[ $layer_archive == dist/* ]]; then
+    file_without_dist="${layer_archive#dist/}"
+    echo "File without 'dist/': $file_without_dist"
+  else
+    file_without_dist=$layer_archive
+    echo "File does not start with 'dist/': $file_without_dist"
+  fi
+
+  # copy dockerfile
+  cp ../Dockerfile.ecrImage .
+  echo "docker build -t ${language_flag}-${version_flag}${arch_flag}:latest \
+  -f Dockerfile.ecrImage \
+  --build-arg layer_zip=${layer_archive} \
+  --build-arg file_without_dist=${file_without_dist} \
+  ."
+  docker build -t ${language_flag}-${version_flag}${arch_flag}:latest \
+  -f Dockerfile.ecrImage \
+  --build-arg layer_zip=${layer_archive} \
+  --build-arg file_without_dist=${file_without_dist} \
+  .
+  echo "docker tag ${language_flag}-${version_flag}${arch_flag}:latest newrelic/newrelic-lambda-layers:${language_flag}-${version_flag}${arch_flag}"
+  docker tag ${language_flag}-${version_flag}${arch_flag}:latest newrelic/newrelic-lambda-layers:${language_flag}-${version_flag}${arch_flag}
+  echo "docker push newrelic/newrelic-lambda-layers:${language_flag}-${version_flag}${arch_flag}"
+  docker push newrelic/newrelic-lambda-layers:${language_flag}-${version_flag}${arch_flag}
 }
